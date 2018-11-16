@@ -69,6 +69,15 @@ class CompletableFutures {
   }
 
   companion object {
+    /**
+     * Creates a facade to the original future, without blocking a thread by using the provided executor to run a
+     * poling function every pollingInterval ms. Tries to interrupt the original subject if completion methods like
+     * CompletableFuture#cancel(Boolean) or CompletableFuture#complete(T) are called on the facade.
+     * @param executor
+     * The executor to schedule the polling on a Executors.newSingleThreadScheduledExecutor() could suffice.
+     * @param pollingInterval
+     * 10 Looks like a nice default polling interval for waiting for IO bound tasks, first polling is done strait away.
+     */
     @JvmStatic
     fun <A> of(
       subject: Future<A>,
@@ -77,6 +86,12 @@ class CompletableFutures {
     ): CompletableFuture<A> =
       if (subject is CompletableFuture<A>) subject else wrap(subject, executor, pollingInterval)
 
+    /**
+     * Wraps the original Future into a new one with the recovery added. Forwards the underlying exception given by
+     * {@link CompletableFuture#handle(BiFunction)} (mostly CompletionException wrapping the original cause) to the
+     * recovery method if the original subject failed, else simply forwards the original subject.
+     * @see CompletableFuture.handle
+     */
     @JvmStatic
     fun <A> recoverWith(
       subject: CompletableFuture<A>,
@@ -98,9 +113,15 @@ class CompletableFutures {
   }
 }
 
+/**
+ * @see CompletableFutures.recoverWith
+ */
 fun <A> CompletableFuture<A>.recoverWith(recovery: (Throwable) -> CompletableFuture<A>): CompletableFuture<A> =
   CompletableFutures.recoverWith(this, recovery)
 
+/**
+ * @see CompletableFutures.of
+ */
 fun <A> Future<A>.toCompletableFuture(
   executor: ScheduledExecutorService,
   pollingInterval: Long = 10
