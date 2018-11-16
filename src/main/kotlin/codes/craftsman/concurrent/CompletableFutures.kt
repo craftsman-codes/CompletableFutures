@@ -1,9 +1,9 @@
 package codes.craftsman.concurrent
 
 import java.util.concurrent.CompletableFuture
+import java.util.concurrent.ExecutionException
 import java.util.concurrent.Future
 import java.util.concurrent.ScheduledExecutorService
-import java.util.concurrent.ExecutionException
 import java.util.concurrent.TimeUnit
 
 class CompletableFutures {
@@ -16,24 +16,26 @@ class CompletableFutures {
     private var work: Future<*> = schedule(0)
 
     override fun cancel(mayInterruptIfRunning: Boolean): Boolean {
-      val underlaying = cancelUndelaying(mayInterruptIfRunning)
+      val succeeded = cancelUnderlying(mayInterruptIfRunning)
 
-      return super.cancel(mayInterruptIfRunning) && underlaying
+      return super.cancel(mayInterruptIfRunning) && succeeded
     }
 
     override fun complete(value: A): Boolean {
-      cancelUndelaying(true)
+      val succeeded = super.complete(value)
+      cancelUnderlying(true)
 
-      return super.complete(value)
+      return succeeded
     }
 
     override fun completeExceptionally(ex: Throwable?): Boolean {
-      cancelUndelaying(true)
+      val succeeded = super.completeExceptionally(ex)
+      cancelUnderlying(true)
 
-      return super.completeExceptionally(ex)
+      return succeeded
     }
 
-    private fun cancelUndelaying(mayInterruptIfRunning: Boolean): Boolean {
+    private fun cancelUnderlying(mayInterruptIfRunning: Boolean): Boolean {
       work.cancel(true)
 
       return subject.cancel(mayInterruptIfRunning)
