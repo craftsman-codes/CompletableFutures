@@ -12,8 +12,7 @@ class CompletableFuturesTest {
     Assertions.assertNotNull(
       CompletableFutures.of(
         CompletableFuture.completedFuture("test"),
-        Executors.newSingleThreadScheduledExecutor(),
-        10
+        Executors.newSingleThreadScheduledExecutor()
       )
     );
   }
