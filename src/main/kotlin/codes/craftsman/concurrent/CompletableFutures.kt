@@ -79,6 +79,7 @@ class CompletableFutures {
      * 10 Looks like a nice default polling interval for waiting for IO bound tasks, first polling is done strait away.
      */
     @JvmStatic
+    @JvmOverloads
     fun <A> of(
       subject: Future<A>,
       executor: ScheduledExecutorService,
